@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Green Patch Produce — Staff</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EEF3E4;--card:#FBFDF6;--ink:#17261B;--ink-soft:#56665A;--leaf:#2E6B3B;--leaf-bright:#3E8B4E;--sun:#E5A823;--tomato:#D2432B;--line:#C6D3B4;--danger:#B3261E;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;padding:16px 12px 60px;font-variant-numeric:tabular-nums;}
+  h1,h2,h3,summary{font-family:'Bricolage Grotesque',sans-serif;}
+  .wrap{max-width:860px;margin:0 auto;}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--leaf);color:#fff;padding:14px 16px;border-radius:10px 10px 0 0;}
+  .top h1{font-size:1.2rem;font-weight:800;}
+  .top small{display:block;font-family:'DM Sans',sans-serif;font-weight:400;font-size:0.76rem;color:#DDEBCF;}
+  .top-actions{display:flex;gap:8px;align-items:center;}
+  .tabs{display:flex;gap:2px;overflow-x:auto;background:var(--card);border:1px solid var(--line);border-top:none;padding:6px 8px 0;}
+  .tab{background:none;border:none;border-bottom:3px solid transparent;padding:10px 14px;font:600 0.86rem 'DM Sans',sans-serif;color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+  .tab.active{color:var(--leaf);border-bottom-color:var(--leaf);}
+  .badge{background:var(--tomato);color:#fff;border-radius:10px;font-size:0.68rem;padding:1px 7px;margin-left:5px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;padding:18px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .chip{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:5px 13px;font:600 0.78rem 'DM Sans',sans-serif;cursor:pointer;color:var(--ink);}
+  .chip.on{background:var(--leaf);border-color:var(--leaf);color:#fff;}
+  input,select,textarea{width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:0.88rem 'DM Sans',sans-serif;color:var(--ink);}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--leaf-bright);outline-offset:1px;}
+  label{display:block;font-size:0.78rem;color:var(--ink-soft);margin:10px 0 4px;font-weight:500;}
+  .grow{flex:1;min-width:160px;}
+  .btn{background:var(--leaf);color:#fff;border:none;padding:9px 16px;border-radius:8px;font:600 0.84rem 'DM Sans',sans-serif;cursor:pointer;}
+  .btn:hover{background:var(--leaf-bright);}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
+  .btn.danger{background:#fff;color:var(--danger);border:1px solid var(--danger);}
+  .btn.sm{padding:5px 10px;font-size:0.76rem;}
+  .btn.light{background:rgba(255,255,255,0.18);}
+  .card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px;margin-bottom:11px;}
+  .card.new{border-left:5px solid var(--sun);}
+  .card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:7px;margin-bottom:8px;}
+  .card-head h3{font-size:0.98rem;}
+  .line{font-size:0.84rem;color:var(--ink-soft);margin-bottom:3px;}
+  .line b{color:var(--ink);}
+  .flag{background:#FBF0C9;border-radius:6px;padding:5px 9px;color:#6B4B00;font-size:0.82rem;margin:6px 0;}
+  .pill{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:10px;text-transform:uppercase;}
+  .s-New{background:#FBE6B8;color:#7A5200;} .s-Preparing{background:#DCEBFA;color:#1F5C99;} .s-Ready{background:#DDF0D5;color:var(--leaf);} .s-Collected{background:#E4E4E4;color:#555;}
+  .group{font:700 0.95rem 'Bricolage Grotesque',sans-serif;color:var(--leaf);margin:18px 0 8px;}
+  .empty{text-align:center;color:var(--ink-soft);padding:28px 10px;font-size:0.88rem;}
+  .item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .item .emo{font-size:1.6rem;width:38px;text-align:center;}
+  .item .info{flex:1;font-size:0.88rem;}
+  .item .info span{display:block;color:var(--ink-soft);font-size:0.78rem;}
+  .out{opacity:0.55;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .totals{background:var(--ink);color:#E8F0DC;border-radius:8px;padding:14px;margin-bottom:14px;font-size:0.86rem;columns:2;}
+  .totals div{break-inside:avoid;padding:2px 0;}
+  dialog{border:1px solid var(--line);border-radius:12px;padding:20px;width:min(480px,94vw);background:var(--card);margin:auto;}
+  dialog::backdrop{background:rgba(15,25,18,0.7);}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.84rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;}
+  .toast.show{opacity:1;}
+  #login{max-width:380px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:26px;text-align:center;}
+  #login h1{margin-bottom:6px;} #login p{font-size:0.84rem;color:var(--ink-soft);margin-bottom:16px;}
+  @media print{body{background:#fff;padding:0;} .top,.tabs,.noprint,.toast{display:none!important;} .panel{border:none;padding:0;} .card{break-inside:avoid;}}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr;} .totals{columns:1;}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>Staff sign-in</h1>
+  <p>Enter your staff email and we’ll send you a one-click sign-in link.</p>
+  <input type="text" id="login-email" placeholder="you@example.com" inputmode="email">
+  <button class="btn" style="width:100%;margin-top:12px;" onclick="sendLink()">Email me a sign-in link</button>
+  <p id="login-msg" style="margin:12px 0 0;color:var(--danger);"></p>
+</div>
+
+<div class="wrap" id="app" style="display:none;">
+  <div class="top">
+    <h1 id="shop-title">Green Patch Produce<small id="who"></small></h1>
+    <div class="top-actions">
+      <button class="btn light sm" id="pause-btn" onclick="togglePause()"></button>
+      <button class="btn light sm" onclick="refresh(true)">Refresh</button>
+      <button class="btn light sm" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"></div>
+</div>
+
+<dialog id="item-dialog"></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://dkuizdsxsqziaxhuasto.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_98nU1oGfgwqpLS_ON80TvA_fsZFcx-H';
+const SHOP_ID = 'greenpatch';
+// Only these emails can open the staff dashboard. Replace with your staff emails.
+const STAFF_EMAILS = ['you@example.com'];
+
+const CFG = 'shop-config', ORD = 'orders';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function dbGet(key) {
+  const { data, error } = await sb.from('app_data').select('value').eq('shop_id', SHOP_ID).eq('key', key).maybeSingle();
+  if (error) throw error;
+  return data ? data.value : null;
+}
+async function dbSet(key, value) {
+  const { error } = await sb.from('app_data').upsert({ shop_id: SHOP_ID, key, value, updated_at: new Date().toISOString() }, { onConflict: 'shop_id,key' });
+  if (error) throw error;
+}
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const money = n => '$' + Number(n).toFixed(2);
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 24) || 'item';
+const fmt = d => d ? new Date(d).toLocaleString('en-AU', { weekday:'short', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' }) : '';
+const $ = id => document.getElementById(id);
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+// Starter data, matching the storefront defaults, used until the first save.
+function seed() {
+  const it = ([id, category, emoji, name, desc, price, opts, maxCount]) => ({ id, category, emoji, name, desc, price, options: opts ? opts.map(([label, price]) => ({ label, price })) : null, count: 0, inStock: true, maxCount });
+  return {
+    shopProfile: { name:'Green Patch Produce', logoUrl:'', logoText:'GPP', subtitle:'Fresh fruit & veg, picked for you', bannerUrl:'', address:'', phone:'', hours:'', policyText:'Orders can be changed or cancelled up to 24 hours before your pickup slot.', ordersPaused:false,
+      theme:{ leaf:'#2E6B3B', leafBright:'#3E8B4E', paper:'#EEF3E4', card:'#FBFDF6', ink:'#17261B', sun:'#E5A823', tomato:'#D2432B' } },
+    boxOptions: {
+      small:{ price:28, name:'Small Veg Box', tagline:'1–2 people', included:[{name:'Carrots',qty:1,note:'1kg'},{name:'Brown Onions',qty:1,note:'1kg'},{name:'Broccoli',qty:2,note:'whole heads'},{name:'Baby Spinach',qty:1,note:'120g bag'}] },
+      family:{ price:45, name:'Family Fruit & Veg Box', tagline:'3–5 people', included:[{name:'Apples',qty:1,note:'1kg, seasonal variety'},{name:'Bananas',qty:1,note:'1kg'},{name:'Potatoes',qty:1,note:'2kg, brushed'},{name:'Carrots',qty:1,note:'1kg'},{name:'Broccoli',qty:1,note:'whole head'},{name:'Cos Lettuce',qty:1,note:'whole head'}] },
+      juice:{ price:38, name:'Juicing Box', tagline:'fruit & greens', included:[{name:'Oranges',qty:1,note:'2kg'},{name:'Carrots',qty:1,note:'1kg'},{name:'Kale',qty:1,note:'1 bunch'},{name:'Lemons',qty:4,note:'whole'}] }
+    },
+    addonsCatalog: [
+      ['apples','Fruit','🍎','Pink Lady Apples','Crisp and sweet, local grower',5.5,[['1kg',5.5],['2kg bag',10]],5],
+      ['bananas','Fruit','🍌','Bananas','Sold by the kilo',4.5,null,5],
+      ['strawberries','Fruit','🍓','Strawberries','250g punnet, in season',4.5,null,6],
+      ['mandarins','Fruit','🍊','Mandarins','Easy-peel and juicy',6,[['1kg',6],['2kg bag',11]],4],
+      ['mango','Fruit','🥭','Kensington Pride Mango','Sold each, ripen at home or ready to eat',3.5,null,8],
+      ['avocado','Fruit','🥑','Hass Avocado','Sold each — tell us how ripe you like them',2.8,null,10],
+      ['carrots','Vegetables','🥕','Carrots','Sweet and crunchy',3.5,[['1kg',3.5],['3kg bulk',9]],5],
+      ['potatoes','Vegetables','🥔','Brushed Potatoes','Great for roasting and mash',6,[['2kg',6],['5kg bulk',13]],4],
+      ['onions','Vegetables','🧅','Brown Onions','Sold by the kilo',3,null,5],
+      ['broccoli','Vegetables','🥦','Broccoli','Whole head',3.5,null,6],
+      ['sweetpotato','Vegetables','🍠','Sweet Potato','Orange flesh, sold by the kilo',4.5,null,5],
+      ['pumpkin','Vegetables','🎃','Kent Pumpkin','Cut to size, sold by the kilo',3,null,5],
+      ['spinach','Leafy Greens & Herbs','🥬','Baby Spinach','120g bag, washed',3.5,null,6],
+      ['cos','Leafy Greens & Herbs','🥬','Cos Lettuce','Whole head',2.8,null,6],
+      ['kale','Leafy Greens & Herbs','🌿','Kale','Bunch',3.5,null,5],
+      ['basil','Leafy Greens & Herbs','🌿','Basil','Fresh bunch',3,null,5],
+      ['coriander','Leafy Greens & Herbs','🌿','Coriander','Fresh bunch',2.5,null,5],
+      ['eggs','Pantry & Eggs','🥚','Free-range Eggs','Dozen, 700g',8,null,4],
+      ['honey','Pantry & Eggs','🍯','Local Honey','Raw and unfiltered',12,[['250g jar',7],['500g jar',12]],4]
+    ].map(it),
+    pickupSlots: [
+      { id:'fri1', label:'Friday, 3:00 PM – 3:30 PM', capacity:8, booked:0 },
+      { id:'fri2', label:'Friday, 3:30 PM – 4:00 PM', capacity:8, booked:0 },
+      { id:'sat1', label:'Saturday, 8:00 AM – 8:30 AM', capacity:8, booked:0 }
+    ]
+  };
+}
+function norm(c) {
+  const s = seed(); c = c || {};
+  return { shopProfile: { ...s.shopProfile, ...(c.shopProfile || {}) }, boxOptions: c.boxOptions || s.boxOptions, addonsCatalog: c.addonsCatalog || s.addonsCatalog, pickupSlots: c.pickupSlots || s.pickupSlots };
+}
+
+let cfg = norm(null), orders = [], seenIds = null;
+let tab = 'orders', ordFilter = 'active', ordQ = '', pickSlot = 'all', catQ = '';
+const TABS = [['orders','Orders'],['pick','Pick list'],['catalogue','Catalogue'],['boxes','Boxes'],['slots','Pickup slots'],['shop','Shop']];
+const NEXT = { New:['Preparing','Start preparing'], Preparing:['Ready','Mark ready'], Ready:['Collected','Mark collected'] };
+
+// Always re-read the latest data before writing so we don't overwrite customer saves.
+async function updateConfig(fn) {
+  try { const fresh = norm(await dbGet(CFG)); fn(fresh); await dbSet(CFG, fresh); cfg = fresh; toast('Saved'); return true; }
+  catch (e) { console.error(e); toast('Could not save — check connection'); return false; }
+}
+async function updateOrders(fn) {
+  try { const fresh = (await dbGet(ORD)) || []; fn(fresh); await dbSet(ORD, fresh); orders = fresh; return true; }
+  catch (e) { console.error(e); toast('Could not save — check connection'); return false; }
+}
+
+async function refresh(manual) {
+  try {
+    cfg = norm(await dbGet(CFG));
+    orders = (await dbGet(ORD)) || [];
+    const ids = new Set(orders.map(o => o.id));
+    if (seenIds && !manual) { const fresh = orders.filter(o => !seenIds.has(o.id)); if (fresh.length) toast(`New order #${fresh[0].id} from ${fresh[0].customer}`); }
+    seenIds = ids;
+    if (manual) toast('Refreshed');
+    if (!document.querySelector('dialog[open]') && !(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !manual)) render();
+    else renderChrome();
+  } catch (e) { toast('Could not load data'); }
+}
+
+function renderChrome() {
+  $('shop-title').childNodes[0].nodeValue = cfg.shopProfile.name;
+  $('pause-btn').innerText = cfg.shopProfile.ordersPaused ? 'Orders paused — resume' : 'Orders open — pause';
+  const active = orders.filter(o => o.status === 'New').length;
+  $('tabs').innerHTML = TABS.map(([k, n]) => `<button class="tab ${tab === k ? 'active' : ''}" onclick="setTab('${k}')">${n}${k === 'orders' && active ? `<span class="badge">${active}</span>` : ''}</button>`).join('');
+}
+function setTab(t) { tab = t; render(); }
+function render() {
+  renderChrome();
+  ({ orders: renderOrders, pick: renderPick, catalogue: renderCatalogue, boxes: renderBoxes, slots: renderSlots, shop: renderShop })[tab]();
+}
+
+async function togglePause() { await updateConfig(c => { c.shopProfile.ordersPaused = !c.shopProfile.ordersPaused; }); render(); }
+
+/* ---------- Orders ---------- */
+function renderOrders() {
+  const filters = [['active','Active'],['New','New'],['Preparing','Preparing'],['Ready','Ready'],['Collected','Collected'],['all','All']];
+  const q = ordQ.toLowerCase();
+  let list = orders.filter(o => (ordFilter === 'all' || (ordFilter === 'active' ? o.status !== 'Collected' : o.status === ordFilter)) &&
+    (!q || String(o.id).includes(q) || (o.customer || '').toLowerCase().includes(q) || (o.customerPhone || '').includes(q)));
+  const slotIdx = l => { const i = cfg.pickupSlots.findIndex(s => s.label === l); return i < 0 ? 99 : i; };
+  list.sort((a, b) => slotIdx(a.pickup) - slotIdx(b.pickup) || new Date(a.orderDate) - new Date(b.orderDate));
+  let html = `<div class="row noprint">${filters.map(([k, n]) => `<button class="chip ${ordFilter === k ? 'on' : ''}" onclick="ordFilter='${k}';renderOrders()">${n}</button>`).join('')}
+    <input class="grow" style="max-width:240px;margin-left:auto;" id="ord-q" placeholder="Search name, phone or #" value="${esc(ordQ)}" oninput="ordQ=this.value;renderOrders();$('ord-q').focus();"></div>`;
+  if (!list.length) html += `<div class="empty">No orders here yet.</div>`;
+  let last = null;
+  list.forEach(o => {
+    if (o.pickup !== last) { html += `<div class="group">${esc(o.pickup)}</div>`; last = o.pickup; }
+    const nx = NEXT[o.status];
+    html += `<div class="card ${o.status === 'New' ? 'new' : ''}">
+      <div class="card-head"><h3>#${esc(o.id)} — ${esc(o.customer)}</h3><span class="pill s-${esc(o.status)}">${esc(o.status)}</span></div>
+      <div class="line">${o.customerPhone ? `📞 <a href="tel:${esc(o.customerPhone)}">${esc(o.customerPhone)}</a> · <a href="sms:${esc(o.customerPhone)}">text</a>` : 'No phone given'}${o.customerEmail ? ` · ✉ ${esc(o.customerEmail)}` : ''}</div>
+      <div class="line"><b>Box:</b> ${esc(o.boxName)}</div>
+      <div class="line"><b>Extras:</b> ${esc(o.extras) || 'None'}</div>
+      ${o.notes ? `<div class="flag"><b>Notes:</b> ${esc(o.notes)}</div>` : ''}
+      ${o.substitution ? `<div class="line"><b>If sold out:</b> ${esc(o.substitution)}</div>` : ''}
+      <div class="line"><b>Total:</b> ${esc(o.total)} · paid online · placed ${fmt(o.orderDate)}</div>
+      <div class="row noprint" style="margin:10px 0 0;">
+        ${nx ? `<button class="btn sm" onclick="setStatus(${Number(o.id)},'${nx[0]}')">${nx[1]}</button>` : ''}
+        <button class="btn danger sm" onclick="cancelOrder(${Number(o.id)})">Cancel &amp; remove</button>
+      </div></div>`;
+  });
+  $('panel').innerHTML = html;
+}
+async function setStatus(id, status) { await updateOrders(a => { const o = a.find(x => x.id === id); if (o) o.status = status; }); render(); }
+async function cancelOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o || !confirm(`Remove order #${id} from ${o.customer}? Remember to refund it in Stripe.`)) return;
+  await updateOrders(a => { const i = a.findIndex(x => x.id === id); if (i >= 0) a.splice(i, 1); });
+  await updateConfig(c => { const s = c.pickupSlots.find(x => x.label === o.pickup); if (s && s.booked > 0) s.booked--; });
+  render();
+}
+
+/* ---------- Pick list ---------- */
+function renderPick() {
+  const labels = cfg.pickupSlots.map(s => s.label);
+  const sel = orders.filter(o => o.status !== 'Collected' && (pickSlot === 'all' || o.pickup === pickSlot));
+  const boxCount = {}, itemCount = {};
+  const add = (m, k, n) => { m[k] = (m[k] || 0) + n; };
+  sel.forEach(o => {
+    if (o.boxName && o.boxName !== 'No Box') add(boxCount, o.boxName, 1);
+    (o.extras || '').split(/,\s*(?=\d+x\s)/).forEach(p => { const m = p.trim().match(/^(\d+)x\s+(.+)$/); if (m) add(itemCount, m[2], parseInt(m[1], 10)); });
+  });
+  const boxLines = o => { const b = Object.values(cfg.boxOptions).find(x => x.name === o.boxName); return b ? b.included.map(i => `<div class="line">☐ ${i.qty}x ${esc(i.name)} — ${esc(i.note)}</div>`).join('') : ''; };
+  let html = `<div class="row noprint"><select class="grow" style="max-width:300px;" onchange="pickSlot=this.value;renderPick()">
+      <option value="all">All pickup slots</option>${labels.map(l => `<option ${l === pickSlot ? 'selected' : ''} value="${esc(l)}">${esc(l)}</option>`).join('')}</select>
+    <button class="btn ghost" onclick="window.print()">Print pick list</button></div>`;
+  if (!sel.length) { $('panel').innerHTML = html + `<div class="empty">Nothing to pick for this slot.</div>`; return; }
+  html += `<h2 style="margin-bottom:8px;">Totals to pick (${sel.length} order${sel.length === 1 ? '' : 's'})</h2><div class="totals">
+    ${Object.entries(boxCount).map(([k, n]) => `<div><b>${n}×</b> ${esc(k)} <span style="opacity:.6">(box)</span></div>`).join('')}
+    ${Object.entries(itemCount).sort().map(([k, n]) => `<div><b>${n}×</b> ${esc(k)}</div>`).join('')}</div>`;
+  sel.sort((a, b) => labels.indexOf(a.pickup) - labels.indexOf(b.pickup)).forEach(o => {
+    html += `<div class="card"><div class="card-head"><h3>#${esc(o.id)} — ${esc(o.customer)}</h3><span class="line" style="margin:0;">${esc(o.pickup)}</span></div>
+      ${o.boxName !== 'No Box' ? `<div class="line"><b>${esc(o.boxName)}</b></div>${boxLines(o)}` : ''}
+      ${(o.extras || '').split(/,\s*(?=\d+x\s)/).filter(Boolean).map(x => `<div class="line">☐ + ${esc(x)}</div>`).join('')}
+      ${o.notes ? `<div class="flag"><b>Notes:</b> ${esc(o.notes)}</div>` : ''}
+      ${o.substitution ? `<div class="line"><b>If sold out:</b> ${esc(o.substitution)}</div>` : ''}</div>`;
+  });
+  $('panel').innerHTML = html;
+}
+
+/* ---------- Catalogue ---------- */
+function renderCatalogue() {
+  const q = catQ.toLowerCase();
+  const items = cfg.addonsCatalog.filter(i => !q || i.name.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q));
+  let html = `<div class="row"><input class="grow" placeholder="Search catalogue" id="cat-q" value="${esc(catQ)}" oninput="catQ=this.value;renderCatalogue();$('cat-q').focus();"><button class="btn" onclick="editItem(null)">+ Add item</button></div>`;
+  const groups = {};
+  items.forEach(i => (groups[i.category || 'Other'] ||= []).push(i));
+  for (const [cat, list] of Object.entries(groups)) {
+    html += `<div class="group">${esc(cat)}</div>` + list.map(i => `<div class="item ${i.inStock ? '' : 'out'}">
+      <div class="emo">${esc(i.emoji || '🥬')}</div>
+      <div class="info"><b>${esc(i.name)}</b><span>${i.options && i.options.length ? i.options.map(o => `${esc(o.label)} ${money(o.price)}`).join(' · ') : money(i.price)}</span></div>
+      <button class="btn sm ${i.inStock ? 'ghost' : ''}" onclick="toggleStock('${esc(i.id)}')">${i.inStock ? 'In stock' : 'Sold out'}</button>
+      <button class="btn sm ghost" onclick="editItem('${esc(i.id)}')">Edit</button></div>`).join('');
+  }
+  if (!items.length) html += `<div class="empty">No items found.</div>`;
+  $('panel').innerHTML = html;
+}
+async function toggleStock(id) { await updateConfig(c => { const i = c.addonsCatalog.find(x => x.id === id); if (i) i.inStock = !i.inStock; }); renderCatalogue(); }
+function editItem(id) {
+  const i = id ? cfg.addonsCatalog.find(x => x.id === id) : { name:'', emoji:'🥬', category:'Fruit', desc:'', price:0, options:null, maxCount:5 };
+  const cats = [...new Set(cfg.addonsCatalog.map(x => x.category).filter(Boolean))];
+  $('item-dialog').innerHTML = `<h2 style="margin-bottom:6px;">${id ? 'Edit item' : 'Add item'}</h2>
+    <div class="grid2"><div><label>Name</label><input id="f-name" value="${esc(i.name)}"></div><div><label>Emoji</label><input id="f-emoji" value="${esc(i.emoji)}"></div></div>
+    <label>Category</label><input id="f-cat" list="cats" value="${esc(i.category)}"><datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+    <label>Description</label><input id="f-desc" value="${esc(i.desc)}">
+    <div class="grid2"><div><label>Price (if no sizes)</label><input id="f-price" type="number" step="0.05" min="0" value="${i.price}"></div><div><label>Max per order</label><input id="f-max" type="number" min="1" value="${i.maxCount || 5}"></div></div>
+    <label>Sizes (optional, one per line as “label | price”)</label><textarea id="f-opts" rows="3" placeholder="1kg | 5.50&#10;2kg bag | 10">${esc((i.options || []).map(o => `${o.label} | ${o.price}`).join('\n'))}</textarea>
+    <div class="row" style="margin:16px 0 0;"><button class="btn" onclick="saveItem('${id ? esc(id) : ''}')">Save</button><button class="btn ghost" onclick="$('item-dialog').close()">Cancel</button>
+      ${id ? `<button class="btn danger" style="margin-left:auto;" onclick="deleteItem('${esc(id)}')">Delete</button>` : ''}</div>`;
+  $('item-dialog').showModal();
+}
+async function saveItem(id) {
+  const name = $('f-name').value.trim();
+  if (!name) { toast('Give the item a name'); return; }
+  const opts = $('f-opts').value.split('\n').map(l => l.split('|').map(x => x.trim())).filter(p => p[0] && !isNaN(parseFloat(p[1]))).map(p => ({ label: p[0], price: parseFloat(p[1]) }));
+  const price = opts.length ? opts[0].price : (parseFloat($('f-price').value) || 0);
+  const data = { name, emoji: $('f-emoji').value.trim() || '🥬', category: $('f-cat').value.trim() || 'Other', desc: $('f-desc').value.trim(), price, options: opts.length ? opts : null, maxCount: parseInt($('f-max').value, 10) || 5 };
+  await updateConfig(c => {
+    const ex = id && c.addonsCatalog.find(x => x.id === id);
+    if (ex) Object.assign(ex, data);
+    else c.addonsCatalog.push({ id: slug(name) + '-' + Math.random().toString(36).slice(2, 5), count: 0, inStock: true, ...data });
+  });
+  $('item-dialog').close(); renderCatalogue();
+}
+async function deleteItem(id) {
+  if (!confirm('Delete this item from the shop?')) return;
+  await updateConfig(c => { c.addonsCatalog = c.addonsCatalog.filter(x => x.id !== id); });
+  $('item-dialog').close(); renderCatalogue();
+}
+
+/* ---------- Boxes ---------- */
+function renderBoxes() {
+  let html = `<div class="row"><button class="btn" onclick="addBox()">+ Add box</button></div>`;
+  html += Object.entries(cfg.boxOptions).map(([k, b]) => `<div class="card" id="box-${esc(k)}">
+    <div class="grid2"><div><label>Box name</label><input id="b-name-${esc(k)}" value="${esc(b.name)}"></div><div><label>Price ($)</label><input id="b-price-${esc(k)}" type="number" step="0.5" min="0" value="${b.price}"></div></div>
+    <label>Short description</label><input id="b-tag-${esc(k)}" value="${esc(b.tagline)}">
+    <label>What’s inside (one per line as “qty | item | note”)</label>
+    <textarea id="b-inc-${esc(k)}" rows="5">${esc(b.included.map(i => `${i.qty} | ${i.name} | ${i.note}`).join('\n'))}</textarea>
+    <div class="row" style="margin:12px 0 0;"><button class="btn" onclick="saveBox('${esc(k)}')">Save box</button><button class="btn danger" onclick="deleteBox('${esc(k)}')">Delete</button></div></div>`).join('');
+  $('panel').innerHTML = html || `<div class="empty">No boxes yet.</div>`;
+}
+async function saveBox(k) {
+  const included = $('b-inc-' + k).value.split('\n').map(l => l.split('|').map(x => x.trim())).filter(p => p[1]).map(p => ({ qty: parseInt(p[0], 10) || 1, name: p[1], note: p[2] || '' }));
+  await updateConfig(c => { c.boxOptions[k] = { name: $('b-name-' + k).value.trim() || 'Box', price: parseFloat($('b-price-' + k).value) || 0, tagline: $('b-tag-' + k).value.trim(), included }; });
+  renderBoxes();
+}
+async function addBox() {
+  const key = 'box' + Math.random().toString(36).slice(2, 6);
+  await updateConfig(c => { c.boxOptions[key] = { name: 'New Box', price: 30, tagline: 'describe it', included: [] }; });
+  renderBoxes();
+}
+async function deleteBox(k) {
+  if (!confirm('Delete this box?')) return;
+  await updateConfig(c => { delete c.boxOptions[k]; }); renderBoxes();
+}
+
+/* ---------- Pickup slots ---------- */
+function renderSlots() {
+  $('panel').innerHTML = `<p class="line" style="margin-bottom:12px;">“Booked” counts up as orders come in. Change it if you take a phone order or need to reset a slot.</p>
+    <div id="slot-rows">${cfg.pickupSlots.map(slotRow).join('')}</div>
+    <div class="row" style="margin-top:14px;"><button class="btn ghost" onclick="addSlotRow()">+ Add slot</button><button class="btn" onclick="saveSlots()">Save slots</button></div>`;
+}
+const slotRow = s => `<div class="row slot" data-id="${esc(s.id)}"><div class="grow" style="flex:3;"><input class="s-label" value="${esc(s.label)}" aria-label="Slot label"></div>
+  <div style="width:90px;"><input class="s-cap" type="number" min="1" value="${s.capacity}" aria-label="Capacity" title="Capacity"></div>
+  <div style="width:90px;"><input class="s-book" type="number" min="0" value="${s.booked}" aria-label="Booked" title="Booked"></div>
+  <button class="btn danger sm" onclick="this.closest('.slot').remove()">Remove</button></div>`;
+function addSlotRow() { $('slot-rows').insertAdjacentHTML('beforeend', slotRow({ id: 'slot' + Math.random().toString(36).slice(2, 6), label: 'Day, 0:00 AM – 0:30 AM', capacity: 8, booked: 0 })); }
+async function saveSlots() {
+  const rows = [...document.querySelectorAll('.slot')].map(r => ({ id: r.dataset.id, label: r.querySelector('.s-label').value.trim(), capacity: parseInt(r.querySelector('.s-cap').value, 10) || 1, booked: parseInt(r.querySelector('.s-book').value, 10) || 0 })).filter(s => s.label);
+  await updateConfig(c => { c.pickupSlots = rows; }); renderSlots();
+}
+
+/* ---------- Shop details ---------- */
+function renderShop() {
+  const p = cfg.shopProfile;
+  const f = (id, label, val) => `<label>${label}</label><input id="${id}" value="${esc(val)}">`;
+  $('panel').innerHTML = `<div class="grid2"><div>${f('sp-name', 'Shop name', p.name)}</div><div>${f('sp-logo', 'Logo letters', p.logoText)}</div></div>
+    ${f('sp-sub', 'Tagline', p.subtitle)}${f('sp-banner', 'Banner image URL (optional)', p.bannerUrl)}
+    ${f('sp-addr', 'Address', p.address)}<div class="grid2"><div>${f('sp-phone', 'Phone', p.phone)}</div><div>${f('sp-hours', 'Opening hours', p.hours)}</div></div>
+    <label>Policy shown under the order button</label><textarea id="sp-policy" rows="2">${esc(p.policyText)}</textarea>
+    <div class="row" style="margin-top:16px;"><button class="btn" onclick="saveShop()">Save shop details</button></div>`;
+}
+async function saveShop() {
+  await updateConfig(c => Object.assign(c.shopProfile, { name: $('sp-name').value.trim() || 'Green Patch Produce', logoText: $('sp-logo').value.trim(), subtitle: $('sp-sub').value.trim(), bannerUrl: $('sp-banner').value.trim(), address: $('sp-addr').value.trim(), phone: $('sp-phone').value.trim(), hours: $('sp-hours').value.trim(), policyText: $('sp-policy').value.trim() }));
+  render();
+}
+
+/* ---------- Auth ---------- */
+async function sendLink() {
+  const email = $('login-email').value.trim().toLowerCase();
+  if (!email.includes('@')) { $('login-msg').innerText = 'Enter a valid email address.'; return; }
+  if (!STAFF_EMAILS.map(e => e.toLowerCase()).includes(email)) { $('login-msg').innerText = 'That email isn’t on the staff list.'; return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
+  $('login-msg').style.color = error ? 'var(--danger)' : 'var(--leaf)';
+  $('login-msg').innerText = error ? 'Could not send the link — try again shortly.' : 'Check your email for the sign-in link.';
+}
+async function signOut() { await sb.auth.signOut(); gate(null); }
+
+let timer = null;
+function gate(session) {
+  const email = session && session.user && session.user.email ? session.user.email.toLowerCase() : null;
+  const ok = email && STAFF_EMAILS.map(e => e.toLowerCase()).includes(email);
+  $('login').style.display = ok ? 'none' : 'block';
+  $('app').style.display = ok ? 'block' : 'none';
+  clearInterval(timer);
+  if (email && !ok) { $('login-msg').innerText = `${email} isn’t on the staff list.`; sb.auth.signOut(); }
+  if (ok) { $('who').innerText = email; refresh(); timer = setInterval(() => refresh(), 30000); }
+}
+
+(async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  gate(session);
+  sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') gate(s); });
+})();
+</script>
+</body>
+</html>

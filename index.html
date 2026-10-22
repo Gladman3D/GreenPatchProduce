@@ -606,7 +606,7 @@ async function trackOrder() {
     const order = (live || []).find(o => String(o.id) === idInput);
     if (!order) { resultEl.innerHTML = `<div class="empty-state">No order found with number #${idInput.replace(/[^0-9]/g, '')}.</div>`; return; }
     const date = order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A';
-    const cls = order.status === 'Preparing' ? 'status-preparing' : order.status === 'Ready' ? 'status-ready' : 'status-new';
+    const cls = order.status === 'Preparing' ? 'status-preparing' : (order.status === 'Ready' || order.status === 'Collected') ? 'status-ready' : 'status-new';
     resultEl.innerHTML = `<div class="order-card">
       <div class="order-card-header"><h4>#${order.id} — ${order.customer}</h4><span class="status-pill ${cls}">${order.status}</span></div>
       <div class="order-line" style="color:var(--tomato);margin-bottom:4px;">Ordered on: ${date}</div>
@@ -712,7 +712,7 @@ function renderPastOrders(email) {
     <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
     ${mine.slice(0, 5).map(o => {
       const date = o.orderDate ? new Date(o.orderDate).toLocaleString() : 'Recent';
-      const cls = o.status === 'Preparing' ? 'status-preparing' : o.status === 'Ready' ? 'status-ready' : 'status-new';
+      const cls = o.status === 'Preparing' ? 'status-preparing' : (o.status === 'Ready' || o.status === 'Collected') ? 'status-ready' : 'status-new';
       return `<div class="order-card" style="margin-bottom:0;">
         <div class="order-card-header"><h4>#${o.id}</h4><span class="status-pill ${cls}">${o.status}</span></div>
         <div class="order-line" style="color:var(--tomato);">Ordered: ${date}</div>
