@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green Patch Produce — Pre-Order</title>
+<meta name="description" content="Order fresh fruit and veg boxes and loose produce for pickup, straight from your local greengrocer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--paper:#EEF3E4;--card:#FBFDF6;--ink:#17261B;--ink-soft:#56665A;--leaf:#2E6B3B;--leaf-bright:#3E8B4E;--sun:#E5A823;--tomato:#D2432B;--line:#C6D3B4;--danger:#B3261E;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 14px 40px;font-variant-numeric:tabular-nums;}
+  h1,h2,h3,.section-title,summary,.modal-title{font-family:'Bricolage Grotesque',sans-serif;}
+  .container{width:100%;max-width:600px;background:var(--card);border-radius:10px;border:1px solid var(--line);overflow:hidden;box-shadow:0 6px 20px rgba(23,38,27,0.1);margin-bottom:20px;position:relative;}
+  .awning{height:12px;background:repeating-linear-gradient(90deg,var(--leaf) 0 20px,var(--card) 20px 40px);border-bottom:2px solid var(--leaf);}
+  .banner{position:relative;min-height:120px;background:var(--leaf);display:flex;align-items:flex-end;padding:16px 18px;}
+  .banner.has-img{background-size:cover;background-position:center;}
+  .profile-area{display:flex;align-items:center;gap:12px;}
+  .logo{width:56px;height:56px;flex-shrink:0;border-radius:14px;background:var(--sun);color:var(--ink);border:3px solid var(--card);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.05rem;background-size:cover;background-position:center;overflow:hidden;transform:rotate(-4deg);}
+  .details h1{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-0.2px;}
+  .details p{font-size:0.8rem;color:#DDEBCF;margin-top:2px;}
+  .step{padding:22px 20px;}
+  .section-title{font-size:1.05rem;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline;}
+  .section-title small{font-family:'DM Sans',sans-serif;font-size:0.74rem;color:var(--ink-soft);font-weight:500;}
+  .grid-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px;}
+  .card-option{background:var(--paper);border:2px solid var(--line);border-radius:8px;padding:13px;cursor:pointer;text-align:left;transition:border-color .15s;}
+  .card-option:hover{border-color:var(--leaf-bright);}
+  .card-option.selected{border-color:var(--leaf);background:rgba(46,107,59,0.09);}
+  .card-option h3{font-size:0.95rem;font-weight:700;}
+  .card-option p{font-size:0.76rem;color:var(--ink-soft);margin-top:3px;}
+  .included-list{border:1px dashed var(--line);border-radius:8px;padding:8px 14px;margin-bottom:20px;background:var(--paper);}
+  .included-row{display:flex;justify-content:space-between;gap:10px;font-size:0.83rem;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .included-row:last-child{border-bottom:none;}
+  .included-row span:last-child{color:var(--leaf);font-size:0.76rem;font-weight:600;white-space:nowrap;}
+  .category-accordion{margin-bottom:12px;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow:hidden;}
+  .category-accordion summary{font-size:1.05rem;font-weight:700;color:var(--leaf);padding:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;user-select:none;}
+  .category-accordion summary::-webkit-details-marker{display:none;}
+  .category-accordion[open] summary{border-bottom:1px dashed var(--line);background:var(--paper);}
+  .category-accordion-content{padding:12px;background:var(--paper);display:flex;flex-direction:column;gap:9px;}
+  .accordion-icon{font-size:0.75rem;color:var(--ink-soft);transition:transform .2s;}
+  .category-accordion[open] .accordion-icon{transform:rotate(180deg);}
+  .item-list{display:flex;flex-direction:column;margin-bottom:20px;}
+  .item-row{display:flex;flex-direction:column;gap:10px;background:var(--card);padding:13px;border-radius:8px;border:1px solid var(--line);}
+  .item-row.out-of-stock{opacity:0.45;border-style:dashed;}
+  .item-left{display:flex;align-items:flex-start;gap:12px;cursor:pointer;width:100%;}
+  .item-left:hover{opacity:.8;}
+  .item-thumb{width:52px;height:52px;border-radius:10px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;}
+  .item-info{flex:1;}
+  .item-info h4{font-size:0.92rem;font-weight:600;margin-bottom:2px;}
+  .item-info span{font-size:0.78rem;color:var(--ink-soft);display:block;}
+  .item-right{display:flex;align-items:center;justify-content:space-between;padding-top:11px;border-top:1px dashed var(--line);}
+  .item-price{font-size:0.95rem;color:var(--tomato);font-weight:700;}
+  .counter-controls{display:flex;align-items:center;gap:9px;}
+  .counter-btn{background:var(--leaf);color:#fff;border:none;width:28px;height:28px;border-radius:50%;font-weight:700;font-size:1rem;cursor:pointer;}
+  .counter-btn:hover{background:var(--leaf-bright);}
+  .counter-btn:disabled{opacity:0.3;cursor:not-allowed;}
+  .counter-value{font-size:0.9rem;font-weight:600;min-width:16px;text-align:center;}
+  .form-group{margin-bottom:18px;}
+  .form-group label{display:block;font-size:0.8rem;color:var(--ink-soft);margin-bottom:6px;font-weight:500;}
+  textarea,select,input[type=text]{width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px;color:var(--ink);font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;}
+  textarea:focus,select:focus,input:focus,button:focus-visible{border-color:var(--leaf);outline:2px solid var(--leaf-bright);outline-offset:1px;}
+  .slot-note{font-size:0.74rem;color:var(--tomato);margin-top:5px;}
+  .summary-box{background:var(--ink);color:#E8F0DC;border-radius:10px;padding:16px;margin-bottom:18px;}
+  .summary-row{display:flex;justify-content:space-between;margin-bottom:7px;font-size:0.83rem;color:#B5C7A8;}
+  .summary-row.total{font-weight:700;font-size:1.1rem;color:#fff;border-top:1px dashed #4A5E4D;padding-top:10px;margin-top:6px;}
+  .cart-item-breakdown{border-bottom:1px dashed #3A4D3D;padding-bottom:6px;margin-bottom:6px;font-size:0.82rem;display:flex;justify-content:space-between;gap:10px;}
+  .btn-primary{display:block;width:100%;background:var(--leaf);color:#fff;border:none;padding:14px;border-radius:8px;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .btn-primary:hover{background:var(--leaf-bright);}
+  .btn-primary:disabled{background:var(--ink-soft);cursor:not-allowed;}
+  .btn-secondary{display:block;width:100%;background:transparent;color:var(--ink-soft);border:1px solid var(--line);padding:11px;border-radius:8px;font-size:0.84rem;font-weight:600;cursor:pointer;margin-top:9px;}
+  .btn-small{background:var(--paper);border:1px solid var(--line);color:var(--ink);font-size:0.74rem;font-weight:600;padding:6px 11px;border-radius:6px;cursor:pointer;}
+  .btn-small:hover{border-color:var(--leaf);}
+  .success-screen{display:none;text-align:center;padding:44px 24px;}
+  .stamp{display:inline-block;border:3px solid var(--leaf);color:var(--leaf);font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1rem;padding:8px 18px;transform:rotate(-4deg);border-radius:8px;margin-bottom:16px;}
+  .success-screen h2{font-size:1.3rem;margin-bottom:10px;}
+  .success-screen p{color:var(--ink-soft);font-size:0.88rem;line-height:1.55;}
+  .ticket-id{font-weight:700;color:var(--tomato);margin-top:10px;}
+  .order-card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:13px;margin-bottom:11px;}
+  .order-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;border-bottom:1px dashed var(--line);padding-bottom:6px;}
+  .order-card-header h4{font-size:0.88rem;}
+  .status-pill{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:10px;text-transform:uppercase;}
+  .status-new{background:#FBE6B8;color:#7A5200;}
+  .status-preparing{background:#DCEBFA;color:#1F5C99;}
+  .status-ready{background:#DDF0D5;color:var(--leaf);}
+  .order-line{font-size:0.8rem;color:var(--ink-soft);margin-bottom:3px;}
+  .empty-state{text-align:center;padding:24px 10px;color:var(--ink-soft);font-size:0.84rem;}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.84rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:90vw;text-align:center;}
+  .toast.show{opacity:1;}
+  .auth-box{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;}
+  .notice{display:none;padding:12px 14px;border-radius:8px;font-size:0.84rem;margin-bottom:18px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,25,18,0.8);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .25s;padding:16px;}
+  .modal-overlay.show{opacity:1;pointer-events:auto;}
+  .modal-card{background:var(--card);width:100%;max-width:420px;border-radius:12px;overflow:hidden;position:relative;border:1px solid var(--line);}
+  .modal-close{position:absolute;top:12px;right:12px;background:rgba(23,38,27,0.7);color:#fff;border:none;width:34px;height:34px;border-radius:50%;font-size:1.4rem;cursor:pointer;z-index:10;}
+  .modal-img{height:150px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;border-bottom:1px solid var(--line);}
+  .modal-badge{position:absolute;top:12px;left:12px;background:var(--leaf);color:#fff;font-size:0.75rem;padding:5px 12px;border-radius:6px;font-weight:600;font-family:'DM Sans',sans-serif;}
+  .modal-body{padding:22px;}
+  .modal-title{font-size:1.5rem;margin-bottom:4px;}
+  .modal-price{color:var(--tomato);font-weight:700;font-size:1.15rem;margin-bottom:12px;}
+  .modal-desc{font-size:0.9rem;color:var(--ink-soft);line-height:1.6;margin-bottom:22px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="awning"></div>
+  <div class="banner" id="banner-bg">
+    <div class="profile-area">
+      <div class="logo" id="header-logo">GPP</div>
+      <div class="details">
+        <h1 id="header-shop-name">Green Patch Produce</h1>
+        <p id="header-shop-sub">Fresh fruit &amp; veg, picked for you</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="customer-view" class="step">
+    <div id="paused-banner" class="notice" style="background:#FBF0C9;border:1px solid var(--sun);color:#6B4B00;">We’re not taking online pre-orders right now — please call the shop directly.</div>
+
+    <div style="text-align:right;margin-bottom:14px;"><span class="btn-small" onclick="openTrackOrder()">Track an order</span></div>
+
+    <div class="form-group">
+      <label for="customer-name">Your full name</label>
+      <input type="text" id="customer-name" placeholder="Your full name" onblur="checkForRepeatOrder()">
+    </div>
+    <div class="form-group">
+      <label for="customer-phone">Phone number <span style="font-weight:400;">(so the shop can call or text you)</span></label>
+      <input type="text" id="customer-phone" placeholder="04XX XXX XXX" inputmode="tel">
+    </div>
+
+    <div id="repeat-order-banner" class="notice" style="background:#E6F2DD;border:1px solid var(--leaf);color:var(--leaf);">
+      <div id="repeat-order-text" style="margin-bottom:9px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-small" onclick="applyRepeatOrder()">Repeat this order</button>
+        <button class="btn-small" onclick="dismissRepeatOrder()">No thanks</button>
+      </div>
+    </div>
+
+    <div class="section-title">Sign in <small>optional — saves your order history</small></div>
+    <div id="auth-signed-out" class="auth-box" style="margin-bottom:22px;">
+      <div class="form-group" style="margin-bottom:10px;"><input type="text" id="auth-email-input" placeholder="you@example.com"></div>
+      <button class="btn-primary" onclick="sendMagicLink()">Email me a sign-in link</button>
+      <p style="font-size:0.74rem;color:var(--ink-soft);margin-top:8px;">One-click link, no password needed. Sign in once and we’ll remember your past orders.</p>
+    </div>
+    <div id="auth-signed-in" class="auth-box" style="margin-bottom:22px;display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:0.85rem;">Signed in as <strong id="auth-email-display"></strong></span>
+        <button class="btn-small" onclick="signOut()">Sign out</button>
+      </div>
+      <div id="past-orders-list"></div>
+    </div>
+
+    <div class="section-title">1. Choose a box <small>base tier</small></div>
+    <div class="grid-options" id="pack-grid"></div>
+
+    <div class="section-title">Included in your box</div>
+    <div class="included-list" id="included-list"></div>
+
+    <div class="section-title">2. Add extras <small>optional, priced per unit</small></div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <input type="text" id="extras-search-input" placeholder="Search fruit, veg, herbs or pantry..." oninput="renderAddons()" style="border-color:var(--leaf);border-width:2px;">
+    </div>
+    <div class="item-list" id="addon-item-list"></div>
+
+    <div class="form-group">
+      <label for="substitution">If something’s sold out</label>
+      <select id="substitution">
+        <option>Swap for something similar</option>
+        <option>Leave it out</option>
+        <option>Call me first</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="cutting-notes">Notes for the shop</label>
+      <textarea id="cutting-notes" rows="2" placeholder="e.g. Avocados ripe for the weekend, bananas still green..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="pickup-slot">Collection time slot</label>
+      <select id="pickup-slot" onchange="updatePickupDisplay(this)"></select>
+      <p class="slot-note" id="slot-note"></p>
+    </div>
+
+    <div class="summary-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px dashed #4A5E4D;padding-bottom:6px;">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;color:#fff;">Your basket</span>
+        <button onclick="clearCart()" style="background:transparent;border:none;color:#B5C7A8;font-size:0.74rem;cursor:pointer;text-decoration:underline;">Clear basket</button>
+      </div>
+      <div id="cart-items-breakdown"></div>
+      <div class="summary-row" style="margin-top:6px;"><span>Selected box</span><span id="summary-box-name" style="color:#fff;">No Box</span></div>
+      <div class="summary-row"><span>Pickup window</span><span id="summary-pickup" style="color:#fff;"></span></div>
+      <div class="summary-row total"><span>Total</span><span id="summary-total">$0.00</span></div>
+    </div>
+
+    <button class="btn-primary" onclick="submitOrder()" id="submit-btn">Place pre-order</button>
+    <p id="policy-text" style="font-size:0.74rem;color:var(--ink-soft);text-align:center;margin-top:10px;"></p>
+  </div>
+
+  <div id="success-screen" class="success-screen step">
+    <div class="stamp">ORDER SECURED</div>
+    <h2>Payment successful</h2>
+    <p>Your box, notes and pickup slot are on the shop’s packing list. We’ll have it fresh and ready.</p>
+    <p class="ticket-id" id="ticket-id"></p>
+    <button class="btn-primary" style="margin-top:22px;" onclick="resetApp()">Build another order</button>
+  </div>
+
+  <div id="track-view" class="step" style="display:none;">
+    <div class="section-title">Track your order</div>
+    <div class="form-group">
+      <label for="track-order-id">Order number</label>
+      <input type="text" id="track-order-id" placeholder="e.g. 4821" inputmode="numeric">
+    </div>
+    <button class="btn-primary" onclick="trackOrder()">Look up order</button>
+    <div id="track-result" style="margin-top:16px;"></div>
+    <button class="btn-secondary" onclick="closeTrackOrder()">Back to shop</button>
+  </div>
+
+  <div id="shop-footer" style="padding:16px 20px;border-top:1px dashed var(--line);font-size:0.76rem;color:var(--ink-soft);text-align:center;display:none;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="item-modal" class="modal-overlay" onclick="closeItemModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeItemModal()" aria-label="Close">&times;</button>
+    <div class="modal-img"><span id="modal-emoji"></span><span id="modal-category-badge" class="modal-badge"></span></div>
+    <div class="modal-body">
+      <h2 id="modal-title" class="modal-title"></h2>
+      <p id="modal-price" class="modal-price"></p>
+      <p id="modal-description" class="modal-desc"></p>
+      <button class="btn-primary" onclick="closeItemModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY_CONFIG = 'shop-config';
+const STORAGE_KEY_ORDERS = 'orders';
+
+const SUPABASE_URL = 'https://dkuizdsxsqziaxhuasto.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_98nU1oGfgwqpLS_ON80TvA_fsZFcx-H';
+// Unique per shop so this store never overwrites the butcher's data in the same table.
+const SHOP_ID = 'greenpatch';
+
+let sb = null;
+try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { sb = null; }
+const hasStorage = !!sb;
+
+async function dbGet(key) {
+  const { data, error } = await sb.from('app_data').select('value').eq('shop_id', SHOP_ID).eq('key', key).maybeSingle();
+  if (error) throw error;
+  return data ? data.value : null;
+}
+async function dbSet(key, value) {
+  const { error } = await sb.from('app_data').upsert(
+    { shop_id: SHOP_ID, key, value, updated_at: new Date().toISOString() },
+    { onConflict: 'shop_id,key' }
+  );
+  if (error) throw error;
+}
+
+let shopProfile = {
+  name: "Green Patch Produce", logoUrl: "", logoText: "GPP", subtitle: "Fresh fruit & veg, picked for you",
+  bannerUrl: "", address: "", phone: "", hours: "",
+  policyText: "Orders can be changed or cancelled up to 24 hours before your pickup slot.",
+  ordersPaused: false,
+  theme: { leaf: "#2E6B3B", leafBright: "#3E8B4E", paper: "#EEF3E4", card: "#FBFDF6", ink: "#17261B", sun: "#E5A823", tomato: "#D2432B" }
+};
+
+let boxOptions = {
+  small: { price: 28, name: "Small Veg Box", tagline: "1–2 people", included: [
+    { name: "Carrots", qty: 1, note: "1kg" }, { name: "Brown Onions", qty: 1, note: "1kg" },
+    { name: "Broccoli", qty: 2, note: "whole heads" }, { name: "Baby Spinach", qty: 1, note: "120g bag" } ]},
+  family: { price: 45, name: "Family Fruit & Veg Box", tagline: "3–5 people", included: [
+    { name: "Apples", qty: 1, note: "1kg, seasonal variety" }, { name: "Bananas", qty: 1, note: "1kg" },
+    { name: "Potatoes", qty: 1, note: "2kg, brushed" }, { name: "Carrots", qty: 1, note: "1kg" },
+    { name: "Broccoli", qty: 1, note: "whole head" }, { name: "Cos Lettuce", qty: 1, note: "whole head" } ]},
+  juice: { price: 38, name: "Juicing Box", tagline: "fruit & greens", included: [
+    { name: "Oranges", qty: 1, note: "2kg" }, { name: "Carrots", qty: 1, note: "1kg" },
+    { name: "Kale", qty: 1, note: "1 bunch" }, { name: "Lemons", qty: 4, note: "whole" } ]}
+};
+
+let addonsCatalog = [
+  { id:'apples', category:'Fruit', emoji:'🍎', name:'Pink Lady Apples', desc:'Crisp and sweet, local grower', price:5.5, options:[{label:'1kg',price:5.5},{label:'2kg bag',price:10}], count:0, inStock:true, maxCount:5 },
+  { id:'bananas', category:'Fruit', emoji:'🍌', name:'Bananas', desc:'Sold by the kilo', price:4.5, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'strawberries', category:'Fruit', emoji:'🍓', name:'Strawberries', desc:'250g punnet, in season', price:4.5, options:null, count:0, inStock:true, maxCount:6 },
+  { id:'mandarins', category:'Fruit', emoji:'🍊', name:'Mandarins', desc:'Easy-peel and juicy', price:6, options:[{label:'1kg',price:6},{label:'2kg bag',price:11}], count:0, inStock:true, maxCount:4 },
+  { id:'mango', category:'Fruit', emoji:'🥭', name:'Kensington Pride Mango', desc:'Sold each, ripen at home or ready to eat', price:3.5, options:null, count:0, inStock:true, maxCount:8 },
+  { id:'avocado', category:'Fruit', emoji:'🥑', name:'Hass Avocado', desc:'Sold each — tell us how ripe you like them', price:2.8, options:null, count:0, inStock:true, maxCount:10 },
+  { id:'carrots', category:'Vegetables', emoji:'🥕', name:'Carrots', desc:'Sweet and crunchy', price:3.5, options:[{label:'1kg',price:3.5},{label:'3kg bulk',price:9}], count:0, inStock:true, maxCount:5 },
+  { id:'potatoes', category:'Vegetables', emoji:'🥔', name:'Brushed Potatoes', desc:'Great for roasting and mash', price:6, options:[{label:'2kg',price:6},{label:'5kg bulk',price:13}], count:0, inStock:true, maxCount:4 },
+  { id:'onions', category:'Vegetables', emoji:'🧅', name:'Brown Onions', desc:'Sold by the kilo', price:3, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'broccoli', category:'Vegetables', emoji:'🥦', name:'Broccoli', desc:'Whole head', price:3.5, options:null, count:0, inStock:true, maxCount:6 },
+  { id:'sweetpotato', category:'Vegetables', emoji:'🍠', name:'Sweet Potato', desc:'Orange flesh, sold by the kilo', price:4.5, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'pumpkin', category:'Vegetables', emoji:'🎃', name:'Kent Pumpkin', desc:'Cut to size, sold by the kilo', price:3, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'spinach', category:'Leafy Greens & Herbs', emoji:'🥬', name:'Baby Spinach', desc:'120g bag, washed', price:3.5, options:null, count:0, inStock:true, maxCount:6 },
+  { id:'cos', category:'Leafy Greens & Herbs', emoji:'🥬', name:'Cos Lettuce', desc:'Whole head', price:2.8, options:null, count:0, inStock:true, maxCount:6 },
+  { id:'kale', category:'Leafy Greens & Herbs', emoji:'🌿', name:'Kale', desc:'Bunch', price:3.5, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'basil', category:'Leafy Greens & Herbs', emoji:'🌿', name:'Basil', desc:'Fresh bunch', price:3, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'coriander', category:'Leafy Greens & Herbs', emoji:'🌿', name:'Coriander', desc:'Fresh bunch', price:2.5, options:null, count:0, inStock:true, maxCount:5 },
+  { id:'eggs', category:'Pantry & Eggs', emoji:'🥚', name:'Free-range Eggs', desc:'Dozen, 700g', price:8, options:null, count:0, inStock:true, maxCount:4 },
+  { id:'honey', category:'Pantry & Eggs', emoji:'🍯', name:'Local Honey', desc:'Raw and unfiltered', price:12, options:[{label:'250g jar',price:7},{label:'500g jar',price:12}], count:0, inStock:true, maxCount:4 }
+];
+
+let pickupSlots = [
+  { id:'fri1', label:'Friday, 3:00 PM – 3:30 PM', capacity:8, booked:0 },
+  { id:'fri2', label:'Friday, 3:30 PM – 4:00 PM', capacity:8, booked:0 },
+  { id:'sat1', label:'Saturday, 8:00 AM – 8:30 AM', capacity:8, booked:0 }
+];
+
+let ordersQueue = [];
+let currentBoxType = 'none';
+let lastFoundOrder = null;
+let currentUserEmail = null;
+
+const price = i => (i.options && i.options.length) ? i.options[i.selectedOptionIndex || 0].price : i.price;
+const variant = i => (i.options && i.options.length) ? ` (${i.options[i.selectedOptionIndex || 0].label})` : '';
+const money = n => '$' + Number(n).toFixed(2);
+
+function openItemModal(id) {
+  const item = addonsCatalog.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('modal-title').innerText = item.name + variant(item);
+  document.getElementById('modal-description').innerText = item.desc || 'No detailed description available.';
+  document.getElementById('modal-price').innerText = money(price(item));
+  document.getElementById('modal-category-badge').innerText = item.category || 'General';
+  document.getElementById('modal-emoji').innerText = item.emoji || '🥬';
+  document.getElementById('item-modal').classList.add('show');
+}
+function closeItemModal() { document.getElementById('item-modal').classList.remove('show'); }
+
+function updateItemVariant(itemId, selectEl) {
+  const item = addonsCatalog.find(i => i.id === itemId);
+  if (!item) return;
+  item.selectedOptionIndex = parseInt(selectEl.value, 10);
+  document.getElementById(`price-display-${itemId}`).innerText = '+' + money(price(item));
+  calculateTotal();
+}
+
+async function loadState() {
+  if (!hasStorage) return;
+  try {
+    const cfg = await dbGet(STORAGE_KEY_CONFIG);
+    if (cfg) {
+      if (cfg.shopProfile) shopProfile = cfg.shopProfile;
+      if (cfg.boxOptions) boxOptions = cfg.boxOptions;
+      if (cfg.addonsCatalog) addonsCatalog = cfg.addonsCatalog;
+      if (cfg.pickupSlots) pickupSlots = cfg.pickupSlots;
+    }
+  } catch (e) {}
+  try { const ord = await dbGet(STORAGE_KEY_ORDERS); if (ord) ordersQueue = ord; } catch (e) {}
+}
+async function saveConfig() {
+  if (!hasStorage) return;
+  try {
+    const catalogToSave = addonsCatalog.map(({ count, selectedOptionIndex, ...rest }) => ({ ...rest, count: 0 }));
+    await dbSet(STORAGE_KEY_CONFIG, { shopProfile, boxOptions, addonsCatalog: catalogToSave, pickupSlots });
+  } catch (e) { showToast('Could not save — check connection'); }
+}
+async function saveOrders() {
+  if (!hasStorage) return;
+  try { await dbSet(STORAGE_KEY_ORDERS, ordersQueue); }
+  catch (e) { showToast('Could not save order — check connection'); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function applyStoreBranding() {
+  document.getElementById('header-shop-name').innerText = shopProfile.name;
+  const logoEl = document.getElementById('header-logo');
+  if (shopProfile.logoUrl) { logoEl.style.backgroundImage = `url('${shopProfile.logoUrl}')`; logoEl.innerText = ''; }
+  else { logoEl.style.backgroundImage = 'none'; logoEl.innerText = shopProfile.logoText || 'GPP'; }
+  document.getElementById('header-shop-sub').innerText = shopProfile.subtitle;
+  const banner = document.getElementById('banner-bg');
+  if (shopProfile.bannerUrl) {
+    banner.classList.add('has-img');
+    banner.style.backgroundImage = `linear-gradient(rgba(23,38,27,0.15), rgba(23,38,27,0.8)), url('${shopProfile.bannerUrl}')`;
+  }
+  document.getElementById('policy-text').innerText = shopProfile.policyText || '';
+  const t = shopProfile.theme;
+  if (t) {
+    const r = document.documentElement.style;
+    r.setProperty('--leaf', t.leaf); r.setProperty('--leaf-bright', t.leafBright);
+    r.setProperty('--paper', t.paper); r.setProperty('--card', t.card);
+    r.setProperty('--ink', t.ink); r.setProperty('--sun', t.sun); r.setProperty('--tomato', t.tomato);
+  }
+  const parts = [shopProfile.address, shopProfile.phone, shopProfile.hours].filter(Boolean);
+  const footer = document.getElementById('shop-footer');
+  footer.innerText = parts.join(' · ');
+  footer.style.display = parts.length ? 'block' : 'none';
+}
+
+function applyPauseState() {
+  const submitBtn = document.getElementById('submit-btn');
+  document.getElementById('paused-banner').style.display = shopProfile.ordersPaused ? 'block' : 'none';
+  submitBtn.disabled = !!shopProfile.ordersPaused;
+  submitBtn.innerText = shopProfile.ordersPaused ? 'Not accepting orders right now' : 'Place pre-order';
+}
+
+function renderPackCards() {
+  const grid = document.getElementById('pack-grid');
+  let html = `<div id="card-none" class="card-option" onclick="selectBoxSize('none')"><h3>No Box</h3><p>$0 · loose produce only</p></div>`;
+  for (const [key, b] of Object.entries(boxOptions)) {
+    html += `<div id="card-${key}" class="card-option" onclick="selectBoxSize('${key}')"><h3>${b.name}</h3><p>$${b.price} · ${b.tagline}</p></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function renderIncluded() {
+  const el = document.getElementById('included-list');
+  if (currentBoxType === 'none') { el.innerHTML = `<div class="empty-state">No box selected. Add loose produce below.</div>`; return; }
+  const box = boxOptions[currentBoxType];
+  if (!box.included.length) { el.innerHTML = `<div class="empty-state">Nothing assigned to this box yet.</div>`; return; }
+  el.innerHTML = box.included.map(i => `<div class="included-row"><span>${i.qty}x ${i.name} — ${i.note}</span><span>included</span></div>`).join('');
+}
+
+function renderAddons() {
+  const listEl = document.getElementById('addon-item-list');
+  if (!addonsCatalog.length) { listEl.innerHTML = `<div class="empty-state">No extras available right now.</div>`; calculateTotal(); return; }
+  const searchInput = document.getElementById('extras-search-input');
+  const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const filtered = term ? addonsCatalog.filter(i =>
+    i.name.toLowerCase().includes(term) || (i.desc && i.desc.toLowerCase().includes(term)) || (i.category && i.category.toLowerCase().includes(term))
+  ) : addonsCatalog;
+
+  if (!filtered.length) {
+    listEl.innerHTML = '';
+    const msg = document.createElement('div'); msg.className = 'empty-state'; msg.textContent = `No items match “${term}”.`;
+    listEl.appendChild(msg); calculateTotal(); return;
+  }
+
+  const grouped = {};
+  filtered.forEach(i => { (grouped[i.category || 'Other'] ||= []).push(i); });
+
+  let html = '';
+  for (const [category, items] of Object.entries(grouped)) {
+    html += `<details class="category-accordion" ${term ? 'open' : ''}>
+      <summary><span>${category} <small style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--ink-soft);font-weight:400;margin-left:6px;">(${items.length})</small></span><span class="accordion-icon">▼</span></summary>
+      <div class="category-accordion-content">`;
+    html += items.map(item => {
+      if (!item.inStock && item.count > 0) item.count = 0;
+      const atMax = item.count >= (item.maxCount || 99);
+      let dropdown = '';
+      if (item.options && item.options.length) {
+        if (typeof item.selectedOptionIndex === 'undefined') item.selectedOptionIndex = 0;
+        dropdown = `<select style="margin-top:6px;max-width:150px;padding:4px 8px;font-size:0.76rem;" onclick="event.stopPropagation()" onchange="updateItemVariant('${item.id}', this)">
+          ${item.options.map((o, idx) => `<option value="${idx}" ${item.selectedOptionIndex === idx ? 'selected' : ''}>${o.label}</option>`).join('')}</select>`;
+      }
+      return `<div class="item-row ${item.inStock ? '' : 'out-of-stock'}">
+        <div class="item-left" onclick="openItemModal('${item.id}')">
+          <div class="item-thumb">${item.emoji || '🥬'}</div>
+          <div class="item-info">
+            <h4>${item.name} ${!item.inStock ? '<span style="color:var(--danger);">(sold out)</span>' : ''}</h4>
+            <span>${item.desc || ''}</span>${dropdown}
+          </div>
+        </div>
+        <div class="item-right">
+          <span class="item-price" id="price-display-${item.id}">+${money(price(item))}</span>
+          <div class="counter-controls">
+            <button class="counter-btn" id="minus-${item.id}" onclick="updateCount('${item.id}', -1)" aria-label="Remove one" ${!item.inStock || item.count === 0 ? 'disabled' : ''}>−</button>
+            <span class="counter-value" id="count-${item.id}">${item.count}</span>
+            <button class="counter-btn" id="plus-${item.id}" onclick="updateCount('${item.id}', 1)" aria-label="Add one" ${!item.inStock || atMax ? 'disabled' : ''}>+</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    html += `</div></details>`;
+  }
+  listEl.innerHTML = html;
+  calculateTotal();
+}
+
+function renderPickupOptions() {
+  const sel = document.getElementById('pickup-slot');
+  sel.innerHTML = pickupSlots.map(s => {
+    const remaining = s.capacity - s.booked;
+    const tag = remaining <= 0 ? ' — Full' : (remaining <= 2 ? ` — ${remaining} left` : '');
+    return `<option value="${s.id}" ${remaining <= 0 ? 'disabled' : ''}>${s.label}${tag}</option>`;
+  }).join('');
+  updatePickupDisplay(sel);
+}
+
+function updatePickupDisplay(selectEl) {
+  const slot = pickupSlots.find(s => s.id === selectEl.value);
+  if (!slot) return;
+  document.getElementById('summary-pickup').innerText = slot.label;
+  const remaining = slot.capacity - slot.booked;
+  document.getElementById('slot-note').innerText = remaining <= 2 && remaining > 0 ? `Only ${remaining} spot${remaining === 1 ? '' : 's'} left in this window.` : '';
+}
+
+function selectBoxSize(type) {
+  currentBoxType = type;
+  document.querySelectorAll('#pack-grid .card-option').forEach(c => c.classList.toggle('selected', c.id === 'card-' + type));
+  document.getElementById('summary-box-name').innerText = type === 'none' ? 'No Box' : (boxOptions[type] ? boxOptions[type].name : 'Box');
+  renderIncluded();
+  calculateTotal();
+}
+
+function updateCount(itemId, change) {
+  const item = addonsCatalog.find(i => i.id === itemId);
+  if (!item || !item.inStock) return;
+  const next = item.count + change;
+  if (next < 0 || next > (item.maxCount || 99)) return;
+  item.count = next;
+  document.getElementById(`count-${itemId}`).innerText = item.count;
+  const minus = document.getElementById(`minus-${itemId}`), plus = document.getElementById(`plus-${itemId}`);
+  if (minus) minus.disabled = item.count === 0;
+  if (plus) plus.disabled = item.count >= (item.maxCount || 99);
+  calculateTotal();
+}
+
+function clearCart() {
+  selectBoxSize('none');
+  addonsCatalog.forEach(i => { i.count = 0; });
+  renderAddons();
+  showToast('Basket cleared.');
+}
+
+function calculateTotal() {
+  const box = currentBoxType !== 'none' ? boxOptions[currentBoxType] : null;
+  let html = box ? `<div class="cart-item-breakdown"><span>1x ${box.name}</span><span>${money(box.price)}</span></div>` : '';
+  let extras = 0;
+  addonsCatalog.forEach(i => {
+    if (i.count > 0) {
+      const line = i.count * price(i);
+      extras += line;
+      html += `<div class="cart-item-breakdown"><span>${i.count}x ${i.name}${variant(i)}</span><span>${money(line)}</span></div>`;
+    }
+  });
+  if (!html) html = `<div style="font-size:0.8rem;color:#9DB090;font-style:italic;margin-bottom:6px;">Your basket is empty</div>`;
+  document.getElementById('cart-items-breakdown').innerHTML = html;
+  const total = (box ? box.price : 0) + extras;
+  document.getElementById('summary-total').innerText = money(total);
+  return total;
+}
+
+async function submitOrder() {
+  if (shopProfile.ordersPaused) { showToast('This shop is not accepting online pre-orders right now.'); return; }
+  const total = calculateTotal();
+  if (total === 0) { showToast('Pick a box or add some produce first.'); return; }
+  if (!sb) { showToast('Checkout isn’t available right now.'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  const customerName = document.getElementById('customer-name').value.trim() || 'Anonymous customer';
+  const customerPhone = document.getElementById('customer-phone').value.trim();
+  const notes = document.getElementById('cutting-notes').value.trim();
+  const substitution = document.getElementById('substitution').value;
+  const slotId = document.getElementById('pickup-slot').value;
+  const slot = pickupSlots.find(s => s.id === slotId);
+  if (!slot || slot.booked >= slot.capacity) { showToast('That pickup slot just filled up — pick another.'); renderPickupOptions(); return; }
+
+  btn.disabled = true; btn.innerText = 'Redirecting to secure checkout...';
+
+  const extrasSummary = addonsCatalog.filter(i => i.count > 0).map(i => `${i.count}x ${i.name}${variant(i)}`).join(', ');
+  const order = {
+    id: Math.floor(1000 + Math.random() * 9000), customer: customerName, customerPhone, customerEmail: currentUserEmail || '',
+    boxName: currentBoxType === 'none' ? 'No Box' : boxOptions[currentBoxType].name,
+    extras: extrasSummary, notes, substitution, pickup: slot.label, total: money(total), status: 'New', orderDate: new Date().toISOString()
+  };
+
+  const stripeItems = [];
+  if (currentBoxType !== 'none') stripeItems.push({ name: boxOptions[currentBoxType].name, price: boxOptions[currentBoxType].price, qty: 1 });
+  addonsCatalog.forEach(i => { if (i.count > 0) stripeItems.push({ name: i.name + variant(i), price: price(i), qty: i.count }); });
+
+  localStorage.setItem('pendingCheckoutOrder', JSON.stringify(order));
+  localStorage.setItem('pendingSlotId', slotId);
+
+  try {
+    const { data, error } = await sb.functions.invoke('stripe-checkout', {
+      body: { items: stripeItems, customerEmail: currentUserEmail || '', origin: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+    if (data && data.url) window.location.href = data.url;
+    else throw new Error('No checkout URL returned. Check the Edge Function is deployed and the JWT toggle is OFF.');
+  } catch (err) {
+    console.error(err);
+    showToast('Secure checkout failed to load. Please try again.');
+    btn.disabled = false; btn.innerText = 'Place pre-order';
+  }
+}
+
+function resetApp() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('customer-view').style.display = 'block';
+  addonsCatalog.forEach(i => i.count = 0);
+  document.getElementById('cutting-notes').value = '';
+  selectBoxSize('none');
+  renderAddons();
+  renderPickupOptions();
+}
+
+async function trackOrder() {
+  const idInput = document.getElementById('track-order-id').value.trim();
+  const resultEl = document.getElementById('track-result');
+  if (!idInput) { resultEl.innerHTML = `<div class="empty-state">Enter an order number.</div>`; return; }
+  if (!sb) { resultEl.innerHTML = `<div class="empty-state">Order tracking isn’t available right now.</div>`; return; }
+  resultEl.innerHTML = `<div class="empty-state">Looking up your order...</div>`;
+  try {
+    const live = await dbGet(STORAGE_KEY_ORDERS);
+    const order = (live || []).find(o => String(o.id) === idInput);
+    if (!order) { resultEl.innerHTML = `<div class="empty-state">No order found with number #${idInput.replace(/[^0-9]/g, '')}.</div>`; return; }
+    const date = order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A';
+    const cls = order.status === 'Preparing' ? 'status-preparing' : order.status === 'Ready' ? 'status-ready' : 'status-new';
+    resultEl.innerHTML = `<div class="order-card">
+      <div class="order-card-header"><h4>#${order.id} — ${order.customer}</h4><span class="status-pill ${cls}">${order.status}</span></div>
+      <div class="order-line" style="color:var(--tomato);margin-bottom:4px;">Ordered on: ${date}</div>
+      <div class="order-line"><strong>Box:</strong> ${order.boxName} (${order.total})</div>
+      <div class="order-line"><strong>Extras:</strong> ${order.extras || 'None'}</div>
+      <div class="order-line"><strong>Pickup:</strong> ${order.pickup}</div></div>`;
+  } catch (err) {
+    resultEl.innerHTML = `<div class="empty-state">Could not connect to check your order.</div>`;
+  }
+}
+function openTrackOrder() {
+  document.getElementById('customer-view').style.display = 'none';
+  document.getElementById('track-view').style.display = 'block';
+  document.getElementById('track-order-id').value = '';
+  document.getElementById('track-result').innerHTML = '';
+}
+function closeTrackOrder() {
+  document.getElementById('track-view').style.display = 'none';
+  document.getElementById('customer-view').style.display = 'block';
+}
+
+function checkForRepeatOrder() {
+  const name = document.getElementById('customer-name').value.trim();
+  const banner = document.getElementById('repeat-order-banner');
+  const match = name && ordersQueue.find(o => o.customer.trim().toLowerCase() === name.toLowerCase());
+  if (!match) { banner.style.display = 'none'; lastFoundOrder = null; return; }
+  lastFoundOrder = match;
+  document.getElementById('repeat-order-text').innerText = `Welcome back! Your last order was ${match.boxName}${match.extras ? ' + ' + match.extras : ''} (${match.total}). Want the same again?`;
+  banner.style.display = 'block';
+}
+function dismissRepeatOrder() { document.getElementById('repeat-order-banner').style.display = 'none'; }
+function applyRepeatOrder() {
+  if (!lastFoundOrder) return;
+  const key = Object.keys(boxOptions).find(k => boxOptions[k].name === lastFoundOrder.boxName);
+  selectBoxSize(key || 'none');
+  addonsCatalog.forEach(i => i.count = 0);
+  if (lastFoundOrder.extras) {
+    lastFoundOrder.extras.split(/,\s*(?=\d+x\s)/).forEach(part => {
+      const m = part.trim().match(/^(\d+)x\s+(.+)$/i);
+      if (!m) return;
+      let name = m[2].trim();
+      let item = addonsCatalog.find(i => i.name.toLowerCase() === name.toLowerCase());
+      if (!item && name.includes('(')) {
+        const clean = name.split('(')[0].trim().toLowerCase();
+        item = addonsCatalog.find(i => i.name.toLowerCase() === clean);
+        const label = (name.match(/\(([^)]+)\)/) || [])[1];
+        if (item && item.options && label) {
+          const idx = item.options.findIndex(o => o.label === label);
+          if (idx >= 0) item.selectedOptionIndex = idx;
+        }
+      }
+      if (item && item.inStock) item.count = Math.min(parseInt(m[1], 10), item.maxCount || 99);
+    });
+  }
+  renderAddons();
+  dismissRepeatOrder();
+  showToast('Loaded your last order — check it over before submitting.');
+}
+
+async function sendMagicLink() {
+  if (!sb) { showToast('Sign-in isn’t available right now.'); return; }
+  const email = document.getElementById('auth-email-input').value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email address.'); return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + window.location.pathname } });
+  if (error) { showToast('Could not send the link — try again in a moment.'); return; }
+  showToast('Check your email for a sign-in link!');
+}
+async function signOut() {
+  if (!sb) return;
+  await sb.auth.signOut();
+  updateAuthUI(null);
+  showToast('Signed out.');
+}
+
+function updateAuthUI(session) {
+  const out = document.getElementById('auth-signed-out'), inn = document.getElementById('auth-signed-in');
+  if (session && session.user) {
+    currentUserEmail = session.user.email;
+    out.style.display = 'none'; inn.style.display = 'block';
+    document.getElementById('auth-email-display').innerText = currentUserEmail;
+    prefillFromProfile(currentUserEmail);
+    renderPastOrders(currentUserEmail);
+  } else {
+    currentUserEmail = null;
+    out.style.display = 'block'; inn.style.display = 'none';
+  }
+}
+
+function prefillFromProfile(email) {
+  const last = ordersQueue.find(o => o.customerEmail && o.customerEmail.toLowerCase() === email.toLowerCase());
+  if (last) {
+    document.getElementById('customer-name').value = last.customer;
+    document.getElementById('customer-phone').value = last.customerPhone || '';
+  }
+}
+
+function renderPastOrders(email) {
+  const listEl = document.getElementById('past-orders-list');
+  const mine = ordersQueue.filter(o => o.customerEmail && o.customerEmail.toLowerCase() === email.toLowerCase());
+  if (!mine.length) { listEl.innerHTML = `<p style="font-size:0.8rem;color:var(--ink-soft);">No past orders yet — place your first one below.</p>`; return; }
+  listEl.innerHTML = `<details style="border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--card);">
+    <summary style="font-size:0.82rem;font-weight:600;cursor:pointer;">View your past orders (${mine.length})</summary>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+    ${mine.slice(0, 5).map(o => {
+      const date = o.orderDate ? new Date(o.orderDate).toLocaleString() : 'Recent';
+      const cls = o.status === 'Preparing' ? 'status-preparing' : o.status === 'Ready' ? 'status-ready' : 'status-new';
+      return `<div class="order-card" style="margin-bottom:0;">
+        <div class="order-card-header"><h4>#${o.id}</h4><span class="status-pill ${cls}">${o.status}</span></div>
+        <div class="order-line" style="color:var(--tomato);">Ordered: ${date}</div>
+        <div class="order-line"><strong>Box:</strong> ${o.boxName} (${o.total})</div>
+        <div class="order-line"><strong>Extras:</strong> ${o.extras || 'None'}</div>
+        <div class="order-line"><strong>Pickup:</strong> ${o.pickup}</div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn-small" onclick="reorderFromHistory(${o.id})">Repeat order</button>
+          <button class="btn-small" style="color:var(--danger);border-color:var(--danger);" onclick="deleteOrder(${o.id})">Delete</button>
+        </div></div>`;
+    }).join('')}</div></details>`;
+}
+
+function reorderFromHistory(orderId) {
+  const order = ordersQueue.find(o => o.id === orderId);
+  if (!order) return;
+  lastFoundOrder = order;
+  applyRepeatOrder();
+}
+async function deleteOrder(orderId) {
+  if (!confirm('Delete this past order from your history?')) return;
+  ordersQueue = ordersQueue.filter(o => o.id !== orderId);
+  await saveOrders();
+  if (currentUserEmail) renderPastOrders(currentUserEmail);
+  showToast('Order deleted from history.');
+}
+
+(async function init() {
+  await loadState();
+  applyStoreBranding();
+  applyPauseState();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('success') === 'true') {
+    const pending = localStorage.getItem('pendingCheckoutOrder');
+    const pendingSlotId = localStorage.getItem('pendingSlotId');
+    if (pending) {
+      const order = JSON.parse(pending);
+      ordersQueue.unshift(order);
+      const slot = pickupSlots.find(s => s.id === pendingSlotId);
+      if (slot) slot.booked += 1;
+      await Promise.all([saveOrders(), saveConfig()]);
+      localStorage.removeItem('pendingCheckoutOrder');
+      localStorage.removeItem('pendingSlotId');
+      document.getElementById('ticket-id').innerText = `Order #${order.id}`;
+      document.getElementById('customer-view').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  } else if (params.get('canceled') === 'true') {
+    showToast('Payment was canceled. Your basket is still here.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (document.getElementById('success-screen').style.display !== 'block') {
+    renderPackCards();
+    renderAddons();
+    renderPickupOptions();
+    selectBoxSize('none');
+  }
+
+  if (sb) {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      updateAuthUI(session);
+      sb.auth.onAuthStateChange((_e, s) => updateAuthUI(s));
+    } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>
